@@ -1,9 +1,15 @@
 import './app.css'
+import Board from './components/Board';
+import Keyboard from './components/Keyboard';
 
 function App() {
   return (
-    <div class="App">
-      
+    <div className="App">
+      <nav>
+         <h1>Wordle</h1>
+      </nav>
+      <Board/>
+      <Keyboard/>
     </div>
   );
 }
