@@ -1,17 +1,23 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import AppContext from '../context/AppContext'
 
 const Letter = ({letterPos,attemptVal}) => {
   //! inOrder to know which letter we are trying to guess we do that by accessing the board state at letterPos and attemptVal
-  const {board,setBoard,correctWord,currentAttempt} = useContext(AppContext)
+  const {board,word,currentAttempt,disabledLetters, setDisabledLetters} = useContext(AppContext)
   const letter = board[attemptVal][letterPos]
-  
-  const correct = correctWord[letterPos] === letter
-  const almost = !correct && letter !== "" && correctWord.split("").includes(letter)
+  const correct = word.toUpperCase()[letterPos] === letter
+  const almost = !correct && letter !== "" && word.includes(letter.toLowerCase()) 
   const letterState = currentAttempt.attempt > attemptVal && (correct ? "correct":almost ? "almost" : "error");
+
+  useEffect(() => {
+   if(letter !=="" && !correct && !almost) {
+    setDisabledLetters((prev)=>[...prev,letter])
+   }
+   
+   
+  }, [currentAttempt.attempt])
   
-  console.log(attemptVal)
-  console.log(currentAttempt.attempt)
+  
   
   return (
     <div className="letter" id={letterState}>
