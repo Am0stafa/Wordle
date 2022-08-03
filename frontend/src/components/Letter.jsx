@@ -1,12 +1,21 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import AppContext from '../context/AppContext'
 
 const Letter = ({letterPos,attemptVal}) => {
   //! inOrder to know which letter we are trying to guess we do that by accessing the board state at letterPos and attemptVal
+  const {board,setBoard,correctWord,currentAttempt} = useContext(AppContext)
+  const letter = board[attemptVal][letterPos]
   
+  const correct = correctWord[letterPos] === letter
+  const almost = !correct && letter !== "" && correctWord.split("").includes(letter)
+  const letterState = currentAttempt.attempt > attemptVal && (correct ? "correct":almost ? "almost" : "error");
+  
+  console.log(attemptVal)
+  console.log(currentAttempt.attempt)
   
   return (
-    <div className="letter" id={letterPos+attemptVal*Math.floor(Math.random()*100)}>
-
+    <div className="letter" id={letterState}>
+      {letter}
     </div>
   )
 }
