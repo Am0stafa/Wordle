@@ -1,22 +1,60 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react'
 import { createContext } from 'react'
-import { boardDefault } from '../components/words'
+import { boardDefault,genWord } from '../components/words'
 
 const AppContext = createContext()
 
 export const AppContextProvider = ({children}) => {
     const [board,setBoard] = useState(boardDefault)
     const [currentAttempt,setCurrentAttempt] = useState({attempt: 0,letterPos:0,next:false})
-    const correctWord = "RIGHT"
-    
-    const onEnter = ()=>{
-        //! we want to check if the amount of letters in the current attempt is five
-        if(currentAttempt.letterPos <5){
-        alert("Incomplete")
-        return
+    const [word, setWord] = useState("")
+    const [disabledLetters, setDisabledLetters] = useState([]);
+    const [gameOver, setGameOver] = useState({
+        gameOver: false,
+        guessedWord: false,
+    });
+
+
+    useEffect(() => {
+        const get =async () => {
+            const w = await genWord()
+            setWord(w)
+            localStorage.setItem("word", w)
         }
-        setCurrentAttempt((prev)=>({attempt:currentAttempt.attempt+1,letterPos:0,next:true}))
+        get()
+    }, []);
+
+
+    const onEnter = ()=>{
+        
+        if(currentAttempt.letterPos < 5){
+            alert("Incomplete")
+            return
+        }
+        if(currentAttempt.letterPos > 5){
+            const fix = [...board]
+            fix[currentAttempt.attempt].length = 5
+            setBoard(fix)
+        }
+        
+        //! we first need to form a word with the letters of these attempt
+        let currWord="";
+        for (let i = 0; i < 5; i++) {
+                currWord+=board[currentAttempt.attempt][i]
+        }
+        
+        if(word.toLowerCase() === currWord.toLowerCase()){
+            setGameOver({ gameOver: true, guessedWord: true });
+
+        }
+        
+        if (currentAttempt.attempt === 5) {
+          setGameOver({ gameOver: true, guessedWord: false });
+          return;
+        }
+        setCurrentAttempt((prev)=>({attempt:prev.attempt+1,letterPos:0,next:true}))
+        console.log(currentAttempt);
 
     }
     const onDelete = ()=>{
@@ -27,7 +65,8 @@ export const AppContextProvider = ({children}) => {
         setCurrentAttempt((prev)=>({...prev,letterPos:prev.letterPos-1,next:false}))
     }
     const  onSelectLetter=(keyVal)=>{
-        if(currentAttempt.attempt > 4) return
+        if(currentAttempt.attempt > 5) return
+        
         const numBoard = [...board]
         numBoard[currentAttempt.attempt][currentAttempt.letterPos]=keyVal
         setBoard(numBoard)
@@ -38,7 +77,7 @@ export const AppContextProvider = ({children}) => {
 
     
   return (
-    <AppContext.Provider value={{board,setBoard,currentAttempt,setCurrentAttempt,onEnter,onDelete,onSelectLetter,correctWord}}>
+    <AppContext.Provider value={{board,setBoard,currentAttempt,setCurrentAttempt,onEnter,onDelete,onSelectLetter,word, setWord,disabledLetters, setDisabledLetters,gameOver, setGameOver}}>
         {children}
     </AppContext.Provider>
   )
